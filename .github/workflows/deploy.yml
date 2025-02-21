@@ -1,0 +1,29 @@
+name: CI/CD Pipeline for Docker Deployment
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Log in to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u jtrujillovecci --password-stdin
+
+
+      # Construcción de la imagen Docker
+      - name: Build Docker image
+        run: |
+          docker build -t my-image:${{ github.sha }} .
+
+      # Subida de la imagen a Docker Hub
+      - name: Push Docker image to Docker Hub
+        run: |
+          docker tag my-image:${{ github.sha }} my-dockerhub-username/my-image:${{ github.sha }}
+          docker push my-dockerhub-username/my-image:${{ github.sha }}
